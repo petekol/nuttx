@@ -16,8 +16,6 @@
 /**/*.o
 /**/*.a
 /**/Make.dep
-/.patchedpx4common
-/arch/arm/include/math.h
 /*.ihx
 /*.hex
 /pcode

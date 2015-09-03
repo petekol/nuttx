@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/stdlib.h
  *
- *   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -95,6 +95,36 @@ struct mallinfo
                  * by free (not in use) chunks.*/
 };
 
+/* Structure type returned by the div() function. */
+
+struct div_s
+{
+  int quot;     /* Quotient */
+  int rem;      /* Remainder */
+};
+
+typedef struct div_s div_t;
+
+/* Structure type returned by the ldiv() function. */
+
+struct ldiv_s
+{
+  long quot;    /* Quotient */
+  long rem;     /* Remainder */
+};
+
+typedef struct ldiv_s ldiv_t;
+
+/* Structure type returned by the lldiv() function. */
+
+struct lldiv_s
+{
+  long quot;    /* Quotient */
+  long rem;     /* Remainder */
+};
+
+typedef struct lldiv_s lldiv_t;
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -170,13 +200,24 @@ FAR void *memalign(size_t, size_t);
 FAR void *zalloc(size_t);
 FAR void *calloc(size_t, size_t);
 
-/* Misc */
+/* Arithmetic */
 
 int      abs(int j);
 long int labs(long int j);
 #ifdef CONFIG_HAVE_LONG_LONG
 long long int llabs(long long int j);
 #endif
+
+#ifdef CONFIG_CAN_PASS_STRUCTS
+div_t    div(int numer, int denom);
+ldiv_t   ldiv(long numer, long denom);
+#ifdef CONFIG_HAVE_LONG_LONG
+lldiv_t  lldiv(long long numer, long long denom);
+#endif
+#endif
+
+/* Temporary files */
+
 int      mktemp(FAR char *path_template);
 int      mkstemp(FAR char *path_template);
 

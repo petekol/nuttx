@@ -106,7 +106,7 @@
  *   Returned Value: A non-negative filter ID is returned on success.
  *                   Otherwise -1 (ERROR) is returned with the errno
  *                   variable set to indicate the nature of the error.
- *   Dependencies:   Requires CONFIG_CAN_EXID *not* defined
+ *   Dependencies:   None
  *
  * CANIOC_ADD_EXTFILTER:
  *   Description:    Add an address filter for a extended 29 bit address.
@@ -114,7 +114,7 @@
  *   Returned Value: A non-negative filter ID is returned on success.
  *                   Otherwise -1 (ERROR) is returned with the errno
  *                   variable set to indicate the nature of the error.
- *   Dependencies:   Requires CONFIG_CAN_EXID=y
+ *   Dependencies:   Requires CONFIG_CAN_EXTID=y
  *
  * CANIOC_DEL_STDFILTER:
  *   Description:    Remove an address filter for a standard 11 bit address.
@@ -123,7 +123,7 @@
  *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
  *                   is returned with the errno variable set to indicate the
  *                   nature of the error.
- *   Dependencies:   Requires CONFIG_CAN_EXID *not* defined
+ *   Dependencies:   None
  *
  * CANIOC_DEL_EXTFILTER:
  *   Description:    Remove an address filter for a standard 29 bit address.
@@ -132,20 +132,42 @@
  *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
  *                   is returned with the errno variable set to indicate the
  *                   nature of the error.
- *   Dependencies:   Requires CONFIG_CAN_EXID=y
+ *   Dependencies:   Requires CONFIG_CAN_EXTID=y
+ *
+ * CANIOC_GET_BITTIMING:
+ *   Description:    Return the current bit timing settings
+ *   Argument:       A pointer to a write-able instance of struct
+ *                   canioc_bittiming_s in which current bit timing values
+ *                   will be returned.
+ *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
+ *                   is returned with the errno variable set to indicate the
+ *                   nature of the error.
+ *   Dependencies:   None
+ *
+ * CANIOC_SET_BITTIMING:
+ *   Description:    Set new current bit timing values
+ *   Argument:       A pointer to a read-able instance of struct
+ *                   canioc_bittiming_s in which the new bit timing values
+ *                   are provided.
+ *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
+ *                   is returned with the errno variable set to indicate the
+ *                   nature of the error.
+ *   Dependencies:   None
  */
 
 #define CANIOC_RTR                _CANIOC(1)
-#define CANIOC_ADD_STDFILTER      _CANIOC(2)
-#define CANIOC_ADD_EXTFILTER      _CANIOC(3)
-#define CANIOC_DEL_STDFILTER      _CANIOC(4)
-#define CANIOC_DEL_EXTFILTER      _CANIOC(5)
+#define CANIOC_GET_BITTIMING      _CANIOC(2)
+#define CANIOC_SET_BITTIMING      _CANIOC(3)
+#define CANIOC_ADD_STDFILTER      _CANIOC(4)
+#define CANIOC_ADD_EXTFILTER      _CANIOC(5)
+#define CANIOC_DEL_STDFILTER      _CANIOC(6)
+#define CANIOC_DEL_EXTFILTER      _CANIOC(7)
 
 /* CANIOC_USER: Device specific ioctl calls can be supported with cmds greater
  * than this value
  */
 
-#define CANIOC_USER               _CANIOC(6)
+#define CANIOC_USER               _CANIOC(8)
 
 /* Convenience macros ***************************************************************/
 
@@ -173,6 +195,22 @@
 
 #define CAN_MSGLEN(nbytes)        (sizeof(struct can_msg_s) - CAN_MAXDATALEN + (nbytes))
 
+/* CAN Error Indications ************************************************************/
+
+#define CAN_ERROR_SYSTEM          (1 << 0)  /* Bit 0:  Driver internal error */
+#define CAN_ERROR_RXLOST          (1 << 1)  /* Bit 1:  RX Message Lost */
+#define CAN_ERROR_TXLOST          (1 << 2)  /* Bit 2:  TX Message Lost */
+#define CAN_ERROR_ACCESS          (1 << 3)  /* Bit 3:  RAM Access Failure */
+#define CAN_ERROR_TIMEOUT         (1 << 4)  /* Bit 4:  Timeout Occurred */
+#define CAN_ERROR_PASSIVE         (1 << 5)  /* Bit 5:  Error Passive */
+#define CAN_ERROR_CRC             (1 << 6)  /* Bit 6:  RX CRC Error */
+#define CAN_ERROR_BIT             (1 << 7)  /* Bit 7:  Bit Error */
+#define CAN_ERROR_ACK             (1 << 8)  /* Bit 8:  Acknowledge Error */
+#define CAN_ERROR_FORMAT          (1 << 9)  /* Bit 9:  Format Error */
+#define CAN_ERROR_STUFF           (1 << 10) /* Bit 10: Stuff Error */
+
+#define CAN_ERROR_ALL             (0x07ff)
+
 /* CAN filter support ***************************************************************/
 /* Some CAN hardware supports a notion of prioritizing messages that match filters.
  * Only two priority levels are currently supported and are encoded as defined
@@ -196,24 +234,34 @@
  *   One based CAN-message is represented with a maximum of 10 bytes.  A message is
  *   composed of at least the first 2 bytes (when there are no data bytes present).
  *
- *   Bytes 0-1:  Hold a 16-bit value in host byte order
- *               Bits 0-3:  Data Length Code (DLC)
- *               Bit  4:    Remote Transmission Request (RTR)
- *               Bits 5-15: The 11-bit CAN identifier
- *
- *   Bytes 2-9:  CAN data
+ *   Bytes 0-1:  Bits 0-3:   Data Length Code (DLC)
+ *               Bit  4:     Remote Transmission Request (RTR)
+ *               Bit  5:     1=Message ID is a bit-encoded error report (See NOTE)
+ *               Bits 6-7:   Unused
+ *   Bytes 1-2:  Bits 0-10:  The 11-bit CAN identifier  This message ID is a bit
+ *                           encoded error set if ch_error is set (See NOTE).
+ *               Bits 11-15: Unused
+ *   Bytes 3-10: CAN data
  *
  * CAN-message Format (with Extended ID support)
  *
  *   One CAN-message consists of a maximum of 13 bytes.  A message is composed of at
  *   least the first 5 bytes (when there are no data bytes).
  *
- *   Bytes 0-3:  Hold 11- or 29-bit CAN ID in host byte order
- *   Byte 4:     Bits 0-3: Data Length Code (DLC)
- *               Bit 4:    Remote Transmission Request (RTR)
- *               Bit 5:    Extended ID indication
- *               Bits 6-7: Unused
- *   Bytes 5-12: CAN data
+ *   Bytes 0-3:  Bits 0-28:  Hold 11- or 29-bit CAN ID in host byte order.  This
+ *                           message ID is a bit encoded error set if ch_error
+ *                           is set (See NOTE).
+ *               Bits 29-31: Unused
+ *   Byte 4:     Bits 0-3:   Data Length Code (DLC)
+ *               Bit 4:      Remote Transmission Request (RTR)
+ *               Bit 5:      1=Message ID is a bit-encoded error report (See NOTE)
+ *               Bit 6:      Extended ID indication
+ *               Bit 7:      Unused
+ *   Bytes 5-12: CAN data    Size determined by DLC
+ *
+ * NOTE: The error indication if valid only on message reports received from the
+ * CAN driver; it is ignored on transmission.  When the error bit is set, the
+ * message ID is an encoded set of error indications (see CAN_ERROR_* definitions).
  *
  * The struct can_msg_s holds this information in a user-friendly, unpacked form.
  * This is the form that is used at the read() and write() driver interfaces.  The
@@ -224,18 +272,21 @@
 #ifdef CONFIG_CAN_EXTID
 struct can_hdr_s
 {
-  uint32_t     ch_id;         /* 11- or 29-bit ID (3-bits unused) */
+  uint32_t     ch_id;         /* 11- or 29-bit ID (20- or 3-bits unused) */
   uint8_t      ch_dlc    : 4; /* 4-bit DLC */
   uint8_t      ch_rtr    : 1; /* RTR indication */
+  uint8_t      ch_error  : 1; /* 1=ch_id is an error report */
   uint8_t      ch_extid  : 1; /* Extended ID indication */
-  uint8_t      ch_unused : 2; /* Unused */
+  uint8_t      ch_unused : 1; /* Unused */
 } packed_struct;
 #else
 struct can_hdr_s
 {
-  uint16_t      ch_dlc   : 4;  /* 4-bit DLC.  May be encoded in CAN_FD mode. */
-  uint16_t      ch_rtr   : 1;  /* RTR indication */
-  uint16_t      ch_id    : 11; /* 11-bit standard ID */
+  uint16_t     ch_id;         /* 11-bit standard ID (5-bits unused) */
+  uint8_t      ch_dlc    : 4; /* 4-bit DLC.  May be encoded in CAN_FD mode. */
+  uint8_t      ch_rtr    : 1; /* RTR indication */
+  uint8_t      ch_error  : 1; /* 1=ch_id is an error report */
+  uint8_t      ch_unused : 2; /* Unused */
 } packed_struct;
 #endif
 
@@ -361,6 +412,7 @@ struct can_dev_s
 };
 
 /* Structures used with ioctl calls */
+/* CANIOC_RTR: */
 
 struct canioc_rtr_s
 {
@@ -368,7 +420,25 @@ struct canioc_rtr_s
   FAR struct can_msg_s *ci_msg;          /* The location to return the RTR response */
 };
 
+/* CANIOC_GET_BITTIMING/CANIOC_SET_BITTIMING: */
+/* Bit time = Tquanta * (Sync_Seg + Prop_Seq + Phase_Seg1 + Phase_Seg2)
+ *          = Tquanta * (TSEG1 + TSEG2 + 1)
+ * Where
+ *   TSEG1 = Prop_Seq + Phase_Seg1
+ *   TSEG2 = Phase_Seg2
+ */
+
+struct canioc_bittiming_s
+{
+  uint32_t              bt_baud;         /* Bit rate = 1 / bit time */
+  uint8_t               bt_tseg1;        /* TSEG1 in time quanta */
+  uint8_t               bt_tseg2;        /* TSEG2 in time quanta */
+  uint8_t               bt_sjw;          /* Synchronization Jump Width in time quanta */
+};
+
 #ifdef CONFIG_CAN_EXTID
+/* CANIOC_ADD_EXTFILTER: */
+
 struct canioc_extfilter_s
 {
   uint32_t              xf_id1;          /* 29-bit ID.  For dual match or for the
@@ -378,7 +448,10 @@ struct canioc_extfilter_s
   uint8_t               xf_type;         /* See CAN_FILTER_* definitions */
   uint8_t               xf_prio;         /* See CAN_MSGPRIO_* definitions */
 };
-#else
+#endif
+
+/* CANIOC_ADD_STDFILTER: */
+
 struct canioc_stdfilter_s
 {
   uint16_t              sf_id1;          /* 11-bit ID.  For dual match or for the
@@ -388,7 +461,6 @@ struct canioc_stdfilter_s
   uint8_t               sf_type;         /* See CAN_FILTER_* definitions */
   uint8_t               sf_prio;         /* See CAN_MSGPRIO_* definitions */
 };
-#endif
 
 /************************************************************************************
  * Public Data

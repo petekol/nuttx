@@ -1573,6 +1573,8 @@ apps/
  |   |  `- README.txt
  |   |- nxplayer
  |   |  `- README.txt
+ |   |- symtab/
+ |   |   `- README.txt
  |   |- usbmsc
  |   |  `- README.txt
  |   |- zmodem

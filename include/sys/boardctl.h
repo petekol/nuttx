@@ -70,6 +70,12 @@
  * CONFIGURATION: CONFIG_BOARDCTL_RESET
  * DEPENDENCIES:  Board logic must provide board_reset
  *
+ * CMD:           BOARDIOC_SYMTAB
+ * DESCRIPTION:   Select a symbol table
+ * ARG:           A pointer to an instance of struct boardioc_symtab_s
+ * CONFIGURATION: CONFIG_BOARDCTL_SYMTAB
+ * DEPENDENCIES:  None
+ *
  * CMD:           BOARDIOC_TSCTEST_SETUP
  * DESCRIPTION:   Touchscreen controller test configuration
  * ARG:           Touch controller device minor number
@@ -94,6 +100,12 @@
  * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_PWMTEST
  * DEPENDENCIES:  Board logic must provide board_pwm_setup()
  *
+ * CMD:           BOARDIOC_CAN_INITIALIZE
+ * DESCRIPTION:   CAN device initialization
+ * ARG:           None
+ * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_CANINIT
+ * DEPENDENCIES:  Board logic must provide board_can_initialize()
+ *
  * CMD:           BOARDIOC_GRAPHICS_SETUP
  * DESCRIPTION:   Configure graphics that require special initialization
  *                procedures
@@ -105,11 +117,13 @@
 #define BOARDIOC_INIT              _BOARDIOC(0x0001)
 #define BOARDIOC_POWEROFF          _BOARDIOC(0x0002)
 #define BOARDIOC_RESET             _BOARDIOC(0x0003)
-#define BOARDIOC_TSCTEST_SETUP     _BOARDIOC(0x0004)
-#define BOARDIOC_TSCTEST_TEARDOWN  _BOARDIOC(0x0005)
-#define BOARDIOC_ADCTEST_SETUP     _BOARDIOC(0x0006)
-#define BOARDIOC_PWMTEST_SETUP     _BOARDIOC(0x0007)
-#define BOARDIOC_GRAPHICS_SETUP    _BOARDIOC(0x0008)
+#define BOARDIOC_SYMTAB            _BOARDIOC(0x0004)
+#define BOARDIOC_TSCTEST_SETUP     _BOARDIOC(0x0005)
+#define BOARDIOC_TSCTEST_TEARDOWN  _BOARDIOC(0x0006)
+#define BOARDIOC_ADCTEST_SETUP     _BOARDIOC(0x0007)
+#define BOARDIOC_PWMTEST_SETUP     _BOARDIOC(0x0008)
+#define BOARDIOC_CAN_INITIALIZE    _BOARDIOC(0x0009)
+#define BOARDIOC_GRAPHICS_SETUP    _BOARDIOC(0x000a)
 
 /* If CONFIG_BOARDCTL_IOCTL=y, then boad-specific commands will be support.
  * In this case, all commands not recognized by boardctl() will be forwarded
@@ -118,7 +132,7 @@
  * User defined board commands may begin with this value:
  */
 
-#define BOARDIOC_USER              _BOARDIOC(0x0009)
+#define BOARDIOC_USER              _BOARDIOC(0x000b)
 
 /****************************************************************************
  * Public Type Definitions
@@ -142,6 +156,18 @@ struct boardioc_graphics_s
 #else
   FAR struct fb_vtable_s *dev;   /* OUT: Framebuffer driver instance */
 #endif
+};
+
+/* In order to full describe a symbol table, a vector containing the address
+ * of the symbol table and the number of elements in the symbol table is
+ * required.
+ */
+
+struct symtab_s; /* Forward reference */
+struct boardioc_symtab_s
+{
+  FAR struct symtab_s *symtab;
+  int nsymbols;
 };
 
 /****************************************************************************

@@ -107,6 +107,9 @@ int arm_start_handler(int irq, FAR void *context)
   FAR struct tcb_s *tcb;
 
   sllvdbg("CPU%d Started\n", up_cpu_index());
+  /* Invalidate CPUn L1 so that is will be reloaded from coherent L2. */
+
+  cp15_invalidate_dcache_all();
 
   /* Reset scheduler parameters */
 

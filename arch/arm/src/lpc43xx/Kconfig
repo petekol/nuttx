@@ -314,6 +314,12 @@ config LPC43_WWDT
 
 endmenu # LPC43xx Peripheral Support
 
+config LPC43_GPIO_IRQ
+	bool "GPIO interrupt support"
+	default n
+	---help---
+		Enable support for GPIO interrupts
+
 if LPC43_ETHERNET
 menu "Ethernet MAC configuration"
 

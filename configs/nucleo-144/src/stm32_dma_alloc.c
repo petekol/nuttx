@@ -1,8 +1,7 @@
-/************************************************************************************
- * arch/arm/src/kl/kl_lowgetc.h
+/****************************************************************************
+ * configs/nucleo-144/stc/stm32_dma_alloc.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2016 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -14,7 +13,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
+ * 3. Neither the name PX4 nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -31,52 +30,88 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
-
-#ifndef __ARCH_ARM_SRC_KL_KINETIS_LOWGETC_H
-#define __ARCH_ARM_SRC_KL_KINETIS_LOWGETC_H
+ ****************************************************************************/
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include "kl_config.h"
+#include <syslog.h>
+#include <stdint.h>
+#include <errno.h>
+#include <nuttx/mm/gran.h>
+
+#include "nucleo-144.h"
+
+#if defined(CONFIG_FAT_DMAMEMORY)
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
 
-/************************************************************************************
- * Public Types
- ************************************************************************************/
-
-/************************************************************************************
- * Public Data
- ************************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
+#if !defined(CONFIG_GRAN)
+#  error microSD DMA support requires CONFIG_GRAN
 #endif
+
+#define BOARD_DMA_ALLOC_POOL_SIZE (8*512)
+
+/************************************************************************************
+ * Private Data
+ ************************************************************************************/
+
+static GRAN_HANDLE dma_allocator;
+
+/* The DMA heap size constrains the total number of things that can be
+ * ready to do DMA at a time.
+ *
+ * For example, FAT DMA depends on one sector-sized buffer per filesystem plus
+ * one sector-sized buffer per file.
+ *
+ * We use a fundamental alignment / granule size of 64B; this is sufficient
+ * to guarantee alignment for the largest STM32 DMA burst (16 beats x 32bits).
+ */
+
+static uint8_t g_dma_heap[BOARD_DMA_ALLOC_POOL_SIZE] __attribute__((aligned(64)));
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
-#ifdef HAVE_SERIAL_CONSOLE
-int kl_lowgetc(void);
-#endif
+/************************************************************************************
+ * Name: stm32_dma_alloc_init
+ *
+ * Description:
+ *   All boards may optionally provide this API to instantiate a pool of
+ *   memory for uses with FAST FS DMA operations.
+ *
+ ************************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
+int stm32_dma_alloc_init(void)
+{
+  dma_allocator = gran_initialize(g_dma_heap,
+                                  sizeof(g_dma_heap),
+                                  7,  /* 128B granule - must be > alignment (XXX bug?) */
+                                  6); /* 64B alignment */
+
+  if (dma_allocator == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  return OK;
 }
-#endif
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_KL_KINETIS_LOWGETC_H */
+
+/* DMA-aware allocator stubs for the FAT filesystem. */
+
+void *fat_dma_alloc(size_t size)
+{
+  return gran_alloc(dma_allocator, size);
+}
+
+void fat_dma_free(FAR void *memory, size_t size)
+{
+  gran_free(dma_allocator, memory, size);
+}
+
+#endif /* CONFIG_FAT_DMAMEMORY */

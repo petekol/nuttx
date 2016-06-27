@@ -392,7 +392,7 @@ STM32F103 Minimum - specific Configuration Options
     CONFIG_CAN2_BAUD - CAN1 BAUD rate.  Required if CONFIG_STM32_CAN2 is defined.
     CONFIG_CAN_TSEG1 - The number of CAN time quanta in segment 1. Default: 6
     CONFIG_CAN_TSEG2 - the number of CAN time quanta in segment 2. Default: 7
-    CONFIG_CAN_REGDEBUG - If CONFIG_DEBUG is set, this will generate an
+    CONFIG_STM32_CAN_REGDEBUG - If CONFIG_DEBUG_FEATURES is set, this will generate an
       dump of all CAN registers.
 
   STM32F103 Minimum SPI Configuration
@@ -548,6 +548,13 @@ Where <subdir> is one of the following:
     console device was about 5 KB (primarily OS support) and the cost of
     the NSH 'ls' command (including OS support) is about 2KB.
 
+    2016-06-21:  Just checking the size after some big system changes:  The
+    size of the base configuration has actually dropped by a few bytes:
+
+     $ arm-none-eabi-size nuttx
+        text    data     bss     dec     hex filename
+      12526       4     816   13346    3422 nuttx
+
   nsh:
   ---
     Configures the NuttShell (nsh) located at apps/examples/nsh. This
@@ -583,7 +590,6 @@ Where <subdir> is one of the following:
     3. This configuration does have UART2 output enabled and set up as
        the system logging device:
 
-       CONFIG_SYSLOG=y                    : Enable output to syslog, not console
        CONFIG_SYSLOG_CHAR=y               : Use a character device for system logging
        CONFIG_SYSLOG_DEVPATH="/dev/ttyS0" : UART2 will be /dev/ttyS0
 

@@ -95,18 +95,17 @@
 
 #define GPIO_BTN_USER  (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTC | GPIO_PIN13)
 
-/* SPI ***************************************************************************
- *
- */
+/* SPI ***************************************************************************/
+
 #define GPIO_SPI_CS    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
                         GPIO_OUTPUT_SET)
 
 #define GPIO_SPI1_CS0   (GPIO_SPI_CS | GPIO_PORTA | GPIO_PIN15)
-#define GPIO_SPI1_CS1   (GPIO_SPI_CS | GPIO_PORTC | GPIO_PIN13)
-#define GPIO_SPI1_CS2   (GPIO_SPI_CS | GPIO_PORTC | GPIO_PIN13)
-#define GPIO_SPI1_CS3   (GPIO_SPI_CS | GPIO_PORTC | GPIO_PIN14)
+#define GPIO_SPI1_CS1   (GPIO_SPI_CS | GPIO_PORTC | GPIO_PIN15)
+#define GPIO_SPI1_CS2   (GPIO_SPI_CS | GPIO_PORTC | GPIO_PIN14)
+#define GPIO_SPI1_CS3   (GPIO_SPI_CS | GPIO_PORTC | GPIO_PIN2)
 #define GPIO_SPI2_CS0   (GPIO_SPI_CS | GPIO_PORTD | GPIO_PIN7)
-#define GPIO_SPI2_CS1   (GPIO_SPI_CS | GPIO_PORTC | GPIO_PIN15)
+#define GPIO_SPI2_CS1   (GPIO_SPI_CS | GPIO_PORTG | GPIO_PIN1)
 #define GPIO_SPI2_CS2   (GPIO_SPI_CS | GPIO_PORTG | GPIO_PIN2)
 #define GPIO_SPI2_CS3   (GPIO_SPI_CS | GPIO_PORTG | GPIO_PIN3)
 #define GPIO_SPI3_CS0   (GPIO_SPI_CS | GPIO_PORTG | GPIO_PIN4)
@@ -164,7 +163,7 @@ void stm32_spidev_initialize(void);
  *
  ************************************************************************************/
 
-#if defined(NUCLEO_SPI_TEST)
+#if defined(CONFIG_NUCLEO_SPI_TEST)
 int stm32_spidev_bus_test(void);
 #endif
 
@@ -183,6 +182,18 @@ void stm32_dma_alloc_init(void);
 
 #if defined (CONFIG_FAT_DMAMEMORY)
 int stm32_dma_alloc_init(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_adc_initialize
+ *
+ * Description:
+ *   Called at application startup time to initialize the ADC functionality.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ADC
+int board_adc_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

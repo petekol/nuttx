@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/syslog/lib_syslogstream.c
+ * drivers/syslog/vsyslog.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,84 +40,75 @@
 #include <nuttx/config.h>
 
 #include <stdio.h>
-#include <unistd.h>
-#include <assert.h>
-#include <errno.h>
+#include <syslog.h>
 
-#include <nuttx/syslog/syslog.h>
+#include <nuttx/init.h>
+#include <nuttx/arch.h>
+#include <nuttx/clock.h>
 #include <nuttx/streams.h>
-
-#include "syslog/syslog.h"
-
-#ifdef CONFIG_SYSLOG
-
-/****************************************************************************
- * Pre-processor definition
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: syslogstream_putc
- ****************************************************************************/
-
-static void syslogstream_putc(FAR struct lib_outstream_s *this, int ch)
-{
-  int ret;
-
-  /* Try writing until the write was successful or until an irrecoverable
-   * error occurs.
-   */
-
-  do
-    {
-      /* Write the character to the supported logging device.  On failure,
-       * syslog_putc returns EOF with the errno value set;
-       */
-
-      ret = syslog_putc(ch);
-      if (ret != EOF)
-        {
-          this->nput++;
-          return;
-        }
-
-      /* The special errno value -EINTR means that syslog_putc() was
-       * awakened by a signal.  This is not a real error and must be
-       * ignored in this context.
-       */
-    }
-  while (errno == -EINTR);
-}
+#include <nuttx/syslog/syslog.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_syslogstream
+ * Name: _vsyslog
  *
  * Description:
- *   Initializes a stream for use with the configured syslog interface.
- *
- * Input parameters:
- *   lowoutstream - User allocated, uninitialized instance of struct
- *                  lib_lowoutstream_s to be initialized.
- *
- * Returned Value:
- *   None (User allocated instance initialized).
+ *   _vsyslog() handles the system logging system calls. It is functionally
+ *   equivalent to vsyslog() except that (1) the per-process priority
+ *   filtering has already been performed and the va_list parameter is
+ *   passed by reference.  That is because the va_list is a structure in
+ *   some compilers and passing of structures in the NuttX sycalls does
+ *   not work.
  *
  ****************************************************************************/
 
-void lib_syslogstream(FAR struct lib_outstream_s *stream)
+int _vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 {
-  stream->put   = syslogstream_putc;
-#ifdef CONFIG_STDIO_LINEBUFFER
-  stream->flush = lib_noflush;
-#endif
-  stream->nput  = 0;
-}
+  struct lib_outstream_s stream;
+#ifdef CONFIG_SYSLOG_TIMESTAMP
+  struct timespec ts;
 
-#endif /* CONFIG_SYSLOG */
+  /* Get the current time.  Since debug output may be generated very early
+   * in the start-up sequence, hardware timer support may not yet be
+   * available.
+   */
+
+  if (!OSINIT_HW_READY() || clock_systimespec(&ts) < 0)
+    {
+      /* Timer hardware is not available, or clock_systimespec failed */
+
+      ts.tv_sec  = 0;
+      ts.tv_nsec = 0;
+    }
+#endif
+
+  /* Wrap the low-level output in a stream object and let lib_vsprintf
+   * do the work.  NOTE that emergency priority output is handled
+   * differently.. it will use the SYSLOG emergency stream.
+   */
+
+  if (priority == LOG_EMERG)
+    {
+      /* Use the SYSLOG emergency stream */
+
+      emergstream((FAR struct lib_outstream_s *)&stream);
+    }
+  else
+    {
+      /* Use the normal SYSLOG stream */
+
+      syslogstream((FAR struct lib_outstream_s *)&stream);
+    }
+
+#if defined(CONFIG_SYSLOG_TIMESTAMP)
+  /* Pre-pend the message with the current time, if available */
+
+  (void)lib_sprintf((FAR struct lib_outstream_s *)&stream,
+                    "[%6d.%06d]", ts.tv_sec, ts.tv_nsec/1000);
+#endif
+
+  return lib_vsprintf((FAR struct lib_outstream_s *)&stream, fmt, *ap);
+}

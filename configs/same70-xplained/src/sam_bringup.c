@@ -46,12 +46,12 @@
 #include <errno.h>
 #include <debug.h>
 
-#ifdef CONFIG_SYSTEM_USBMONITOR
-#  include <apps/usbmonitor.h>
+#ifdef CONFIG_USBMONITOR
+#  include <nuttx/usb/usbmonitor.h>
 #endif
 
-#include <nuttx/fs/fs.h>
-#include <nuttx/fs/ramdisk.h>
+#include <nuttx/drivers/drivers.h>
+#include <nuttx/drivers/ramdisk.h>
 #include <nuttx/fs/nxffs.h>
 #include <nuttx/binfmt/elf.h>
 #include <nuttx/i2c/i2c_master.h>
@@ -311,7 +311,7 @@ int sam_bringup(void)
 #ifdef HAVE_USBMONITOR
   /* Start the USB Monitor */
 
-  ret = usbmonitor_start(0, NULL);
+  ret = usbmonitor_start();
   if (ret != OK)
     {
       _err("ERROR: Failed to start the USB monitor: %d\n", ret);
@@ -326,6 +326,14 @@ int sam_bringup(void)
   if (ret < 0)
     {
       _err("ERROR: Initialization of the ELF loader failed: %d\n", ret);
+    }
+#endif
+
+#if defined(CONFIG_SAMV7_DAC0) || defined(CONFIG_SAMV7_DAC1)
+  ret = sam_dacdev_initialize();
+  if (ret < 0)
+    {
+      _err("ERROR: Initialization of the DAC module failed: %d\n", ret);
     }
 #endif
 

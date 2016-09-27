@@ -1788,12 +1788,6 @@ static void stm32_receive(struct stm32_ethmac_s *priv)
           continue;
         }
 
-#ifdef CONFIG_NET_PKT
-      /* When packet sockets are enabled, feed the frame into the packet tap */
-
-       pkt_input(&priv->dev);
-#endif
-
       /* We only accept IP packets of the configured type and ARP packets */
 
 #ifdef CONFIG_NET_IPv4
@@ -3809,7 +3803,6 @@ static inline void stm32_ethgpioconfig(struct stm32_ethmac_s *priv)
   stm32_configgpio(GPIO_ETH_RMII_RXD1);
   stm32_configgpio(GPIO_ETH_RMII_TXD0);
   stm32_configgpio(GPIO_ETH_RMII_TXD1);
-  /* stm32_configgpio(GPIO_ETH_RMII_TX_CLK); not needed? */
   stm32_configgpio(GPIO_ETH_RMII_TX_EN);
 
 #endif

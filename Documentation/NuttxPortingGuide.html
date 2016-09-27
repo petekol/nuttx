@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: June 22, 2016</p>
+      <p>Last Updated: August 31, 2016</p>
     </td>
   </tr>
 </table>
@@ -948,22 +948,46 @@ drivers/
 |   |-- Kconfig
 |   |-- Make.defs
 |   `-- <i>(Common ADC and DAC driver source files)</i>
+|-- audio/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(Common audio device source files)</i>
 |-- bch/
 |   |-- Kconfig
 |   |-- Make.defs
 |   `-- <i>(bch driver source files)</i>
+|-- contactless/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(Common contactless device driver source files)</i>
 |-- input/
 |   |-- Kconfig
 |   |-- Make.defs
 |   `-- <i>(Common touchscreen and keypad driver source files)</i>
+|-- ioexpander/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(Common I/O expander and GPIO-related driver source files)</i>
 |-- lcd/
 |   |-- Kconfig
 |   |-- Make.defs
 |   `-- <i>(Common LCD driver source files)</i>
+|-- leds/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(Common LED device driver source files)</i>
+|-- loop/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(Common loop device driver source files)</i>
 |-- mmcsd/
 |   |-- Kconfig
 |   |-- Make.defs
 |   `-- <i>(Common MMC/SD card driver source files)</i>
+|-- modem/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(Common modem driver source files)</i>
 |-- mtd/
 |   |-- Kconfig
 |   |-- Make.defs
@@ -972,11 +996,19 @@ drivers/
 |   |-- Kconfig
 |   |-- Make.defs
 |   `-- <i>(Common network driver source files)</i>
+|-- pipes/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(Common pipe and FIFO driver source files)</i>
+|-- power/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(Common power-related driver source files)</i>
 |-- sensors/
 |   |-- Kconfig
 |   |-- Make.defs
 |   `-- <i>(Common sensor driver source files)</i>
-|-- serial/
+|-- sercomm/
 |   |-- Kconfig
 |   |-- Make.defs
 |   `-- <i>(Files for the Calypso SERCOMM driver)</i>
@@ -984,6 +1016,18 @@ drivers/
 |   |-- Kconfig
 |   |-- Make.defs
 |   `-- <i>(Common front-end character drivers for chip-specific UARTs)</i>
+|-- spi/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(Common SPI-related drivers and helper fuctions)</i>
+|-- syslog/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(System logging device support)</i>
+|-- timers/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(Timer-based device driver support)</i>
 |-- usbdev/
 |   |-- Kconfig
 |   |-- Make.defs
@@ -992,6 +1036,10 @@ drivers/
 |   |-- Kconfig
 |   |-- Make.defs
 |   `-- <i>(Common USB host driver source files)</i>
+|-- usbmonitor/
+|   |-- Kconfig
+|   |-- Make.defs
+|   `-- <i>(USB monitor source files)</i>
 |-- wireless/
 |   |-- Kconfig
 |   |-- Make.defs
@@ -1088,16 +1136,32 @@ include/
 |   |  `-- <i>(Audio driver header files)</i>
 |   |-binfmt/
 |   |  `-- <i>(Binary format header files)</i>
+|   |-contactless/
+|   |  `-- <i>(Contactless driver header files)</i>
+|   |-crypto/
+|   |  `-- <i>(Cryptographic support header files)</i>
+|   |-drivers/
+|   |  `-- <i>(Miscellaneous driver header files)</i>
+|   |-eeprom/
+|   |  `-- <i>(EEPROM driver header files)</i>
 |   |-fs/
 |   |  `-- <i>(File System header files)</i>
 |   |-input/
 |   |  `-- <i>(Input device driver header files)</i>
+|   |-ioexpander/
+|   |  `-- <i>(I/O exander and GPIO drvier header files)</i>
 |   |-lcd/
 |   |  `-- <i>(LCD driver header files)</i>
+|   |-leds/
+|   |  `-- <i>(LED driver header files)</i>
+|   |-lib/
+|   |  `-- <i>(Non-standard C library driver header files)</i>
+|   |-mm/
+|   |  `-- <i>(Memory management header files)</i>
+|   |-modem/
+|   |  `-- <i>(Modem driver header files)</i>
 |   |-mtd/
 |   |  `-- <i>(Memory technology device header files)</i>
-|   |-serial/
-|   |  `-- <i>(Serial driver header files)</i>
 |   |-net/
 |   |  `-- <i>(Networking header files)</i>
 |   |-nx/
@@ -1114,8 +1178,12 @@ include/
 |   |  `-- <i>(SPI driver header files)</i>
 |   |-syslog/
 |   |  `-- <i>(SYSLOG header files)</i>
+|   |-timers/
+|   |  `-- <i>(Timer-related driver header files)</i>
 |   |-usb/
 |   |  `-- <i>(USB driver header files)</i>
+|   |-video/
+|   |  `-- <i>(Video-related driver header files)</i>
 |   `-wireless/
 |      `-- <i>(Wireless device driver header files)</i>
 `- sys/
@@ -1148,16 +1216,28 @@ include/
 </p>
 <ul><pre>
 libc/
+|-- aio/
+|   `-- <i>(Implementation of functions from aio.h)</i>
+|-- audio/
+|   `-- <i>(Implementation of audio-related functions)</i>
+|-- dirent/
+|   `-- <i>(Implementation of functions from dirent.h)</i>
+|-- fixedmath/
+|   `-- <i>(Implementation of functions from fixedmath.h)</i>
+|-- hex2bin/
+|   `-- <i>(Implementation of functions from hex2bin.h)</i>
 |-- libgen/
 |   `-- <i>(Implementation of functions from libgen.h)</i>
 |-- math/
 |   `-- <i>(Implementation of functions from fixedmath.h)</i>
 |-- misc/
 |   `-- <i>(Implementation of miscellaneous library functions)</i>
-|-- mqueue/
-|   `-- <i>(Implementation of some functions from mqueue.h)</i>
 |-- net/
 |   `-- <i>(Implementation of network-related library functions)</i>
+|-- netdb/
+|   `-- <i>(Implementation of functions from netdb.h)</i>
+|-- pthread/
+|   `-- <i>(Implementation of functions from pthread.h)</i>
 |-- queue/
 |   `-- <i>(Implementation of functions from queue.h)</i>
 |-- sched/
@@ -1166,16 +1246,31 @@ libc/
 |   `-- <i>(Implementation of some functions from semaphore.h)</i>
 |-- signal/
 |   `-- <i>(Implementation of some functions from signal.h)</i>
+|-- spawn/
+|   `-- <i>(Implementation of some functions from spawn.h)</i>
 |-- stdio/
 |   `-- <i>(Implementation of functions from stdio.h)</i>
 |-- stdlib/
 |   `-- <i>(Implementation of functions from stdlib.h)</i>
 |-- string/
 |   `-- <i>(Implementation of functions from string.h)</i>
+|-- symtab/
+|   `-- <i>(Implementation of symbol-table library functions)</i>
+|-- syslog/
+|   `-- <i>(Implementation of functions from syslog.h)</i>
+|-- termios/
+|   `-- <i>(Implementation of functions from termios.h)</i>
 |-- time/
 |   `-- <i>(Implementation of some functions from time.h)</i>
-`-- unistd/
-    `-- <i>(Implementation of some functions from unistd.h)</i>
+|-- tls/
+|   `-- <i>(Implementation of some functions from tls.h)</i>
+|-- wqueue/
+|   `-- <i>(Implementation of some functions from wqueue.h)</i>
+|-- unistd/
+|   `-- <i>(Implementation of some functions from unistd.h)</i>
+`-- zoneinfo/
+    `-- <i>(Implementation of timezone database)</i>
+
 </pre></ul>
 
 <h2>2.13 <a name="DirStructLibXX">nuttx/libxx</a></h2>
@@ -3820,7 +3915,7 @@ void sched_process_timer(void);
   The timer interrupt logic itself is implemented in the
   architecture specific code, but must call the following OS
   function periodically -- the calling interval must be
-  <code>MSEC_PER_TICK</code>.
+  <code>CONFIG_USEC_PER_TICK</code>.
 </p>
 
 <h3><a name="schedtimerexpiration">4.8.4 <code>sched_timer_expiration()</code></a></h3>
@@ -4439,7 +4534,7 @@ void board_autoled_off(int led);
 </p>
 <ul>
   <li><b>Interface Definition</b>.
-    The header file for the NuttX PWM driver reside at <code>include/nuttx/pwm.h</code>.
+    The header file for the NuttX PWM driver reside at <code>include/nuttx/drivers/pwm.h</code>.
     This header file includes both the application level interface to the PWM driver as well as the interface between the &quot;upper half&quot; and &quot;lower half&quot; drivers.
     The PWM module uses a standard character driver framework.
     However, since the PWM driver is a devices control interface and not a data transfer interface,
@@ -4472,7 +4567,7 @@ void board_autoled_off(int led);
 </p>
 <ul>
   <li><b>Interface Definition</b>.
-    The header file for the NuttX CAN driver reside at <code>include/nuttx/can.h</code>.
+    The header file for the NuttX CAN driver resides at <code>include/nuttx/drivers/can.h</code>.
     This header file includes both the application level interface to the CAN driver as well as the interface between the &quot;upper half&quot; and &quot;lower half&quot; drivers.
     The CAN module uses a standard character driver framework.
   </li>
@@ -5566,6 +5661,7 @@ int kbd_decode(FAR struct lib_instream_s *stream, FAR struct kbd_getstate_s *sta
 <h4><a name="vsyslog">6.4.1.2 <code>syslog()</code> and <code>vsyslog()</code></a></h4>
 <p><b>Function Prototypes:</b></p>
 <ul><pre>
+#include &lt;syslog.h&gt;
 int syslog(int priority, FAR const IPTR char *format, ...);
 int vsyslog(int priority, FAR const IPTR char *src, va_list ap);
 </pre></ul>
@@ -5585,6 +5681,7 @@ int vsyslog(int priority, FAR const IPTR char *src, va_list ap);
 </p>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
+#include &lt;syslog.h&gt;
 int setlogmask(int mask);
 </pre></ul>
 <p><b>Description:</b>
@@ -5614,7 +5711,7 @@ int setlogmask(int mask);
       <i>Kernel Build</i>:  The kernel build is compliant with the POSIX requirement: There will be one mask for for each user process, controlling the SYSLOG output only form that process.  There will be a separate mask accessable only in the kernel code to control kernel SYSLOG output.
 </ul>
 <p>
-  These are all standard interfaces as defined at <a href="http://pubs.opengroup.org/onlinepubs/009695399/functions/closelog.html">OpenGroup.org</a>.
+  The above are all standard interfaces as defined at <a href="http://pubs.opengroup.org/onlinepubs/009695399/functions/closelog.html">OpenGroup.org</a>.  Those interfaces are available for use by application software.  The remaining interfaces discussed in this section are non-standard, OS-internal interfaces.
 </p>
 
 <h4><a name="debugifs">6.4.1.4 Debug Interfaces</a></h4>
@@ -5662,7 +5759,7 @@ int setlogmask(int mask);
   </li>
   <li>
     <p>
-      <code>alert()</code>. The highest priority debug macro (<code>LOG_EMERG</code>) and is controlled by <code>CONFIG_DEBUG_ALERT</code>.  The <code>alert()</code> macro is reserved for use solely by assertion and crash handling logic.  It also differs from the other macros in that there it cannot be enabled per subsystem.
+      <code>alert()</code>. The highest priority debug macro (<code>LOG_EMERG</code>) and is controlled by <code>CONFIG_DEBUG_ALERT</code>.  The <code>alert()</code> macro is reserved for use solely by assertion and crash handling logic.  It also differs from the other macros in that it cannot be enabled or disabled per subsystem.
   </li>
 </ul>
 
@@ -5695,6 +5792,7 @@ int setlogmask(int mask);
 <h4><a name="syslogchannel">6.4.2.1 <code>syslog_channel()</code></a></h4>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
+#include &lt;nuttx/syslog/syslog.h&gt;
 int syslog_channel(FAR const struct syslog_channel_s *channel);
 </pre></ul>
 <p><b>Description:</b>
@@ -5744,6 +5842,7 @@ int syslog_channel(FAR const struct syslog_channel_s *channel);
 <h4><a name="sysloginit">6.4.2.3 <code>syslog_initialize()</code></a></h4>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
+#include &lt;nuttx/syslog/syslog.h&gt;
 #ifndef CONFIG_ARCH_SYSLOG
 int syslog_initialize(enum syslog_init_e phase);
 #else
@@ -5800,6 +5899,62 @@ int syslog_initialize(enum syslog_init_e phase);
 <p>
   There are other types of SYSLOG channel devices that may require even further initialization.  For example, the file SYSLOG channel (described below) cannot be initialized until the necessary file systems have been mounted.
 </p>
+
+<h4><a name="sysloginterrupt">6.4.2.3 Interrupt Level SYSLOG Output</a></h4>
+<p>
+  As a general statement, SYSLOG output only supports //normal// output from NuttX tasks.  However, for debugging purposes, it is also useful to get SYSLOG output from interrupt level logic.  In an embedded system, that is often where the most critical operations are performed.
+</p>
+<p>
+  There are three conditions under which SYSLOG output generated from interrupt level processing can a included the SYSLOG output stream:
+</p>
+<ol>
+  <li>
+    <p><b>Low-Level Serial Output</b>.
+      If you are using a SYSLOG console channel (<code>CONFIG_SYSLOG_CONSOLE</code>) with a serial console (<code>CONFIG_SYSLOG_SERIAL_CONSOLE</code>) and if the underlying architecture supports the low-level <code>up_putc()</code> interface(<code>CONFIG_ARCH_LOWPUTC</code>), then the SYLOG logic will direct the output to <code>up_putc()</code> which is capable of generating the serial output within the context of an interrupt handler.
+    </p>
+    <p>
+      There are a few issues in doing this however:
+    </p>
+    <ul>
+      <li>
+        <p>
+          <code>up_putc()</code> is able to generate debug output in any context because it disables serial interrupts and polls the hardware directly.  These polls may take many milliseconds and during that time, all interrupts are disable within the interrupt handler.  This, of course, interferes with the real-time behavior of the RTOS.
+        </p>
+      </li>
+      <li>
+        <p>
+          The output generated by <code>up_putc()</code> is immediate and in real-time.  The normal SYSLOG output, on the other hand, is buffered in the serial driver and may be delayed with respect to the immediate output by many lines.  Therefore, the interrupt level SYSLOG ouput provided throug <code>up_putc()</code> is grossly out of synchronization with other debug output
+        </p>
+      </li>
+    </ul>
+  </ul>
+</li>
+<li>
+  <p><b>In-Memory Buffering</b>.
+    If the RAMLOG SYSLOG channel is supported, then all SYSLOG output is buffered in memory.  Interrupt level SYSLOG output is no different than normal SYSLOG output in this case.
+  </p>
+</li>
+<li>
+  <p><b>Serialization Buffer</b>.
+    A final option is the use the an <i>interrupt buffer</i> to buffer the interrupt level SYSLOG output.  In this case:
+  </p>
+  <ul>
+    <li>
+      <p>
+        SYSLOG output generated from interrupt level process in not sent to the SYSLOG channel immediately.  Rather, it is buffered in the interrupt serialization buffer.
+      </p>
+    </li>
+    <li>
+      <p>
+        Later, when the next normal syslog output is generated, it will first empty the content of the interrupt buffer to the SYSLOG device in the proper context.  It will then be followed by the normal syslog output.  In this case, the interrupt level SYSLOG output will interrupt the normal output stream and the interrupt level SYSLOG output will be inserted into the correct position in the SYSLOG output when the next normal SYLOG output is generated.
+      </p>
+    </li>
+  </ul>
+  <p>
+    The SYSLOG interrupt buffer is enabled with <code>CONFIG_SYSLOG_INTBUFFER</code>.  When the interrupt buffer is enabled, you must also provide the size of the interrupt buffer with <code>CONFIG_SYSLOG_INTBUFSIZE</code>.
+  </p>
+</li>
+</ol>
 
 <h3><a name="syslogoptions">6.4.3 SYSLOG Channel Options</a></h3>
 <h4><a name="syslogconsole">6.4.3.1 SYSLOG Console Device</a></h4>
@@ -5880,6 +6035,7 @@ int syslog_initialize(enum syslog_init_e phase);
 <h4><a name="syslogfiledev">6.4.3.4 <code>syslog_file_channel()</code></a></h4>
 <p><b>Function Prototype:</b></p>
 <ul><pre>
+#include &lt;nuttx/syslog/syslog.h&gt;
 #ifdef CONFIG_SYSLOG_FILE
 int syslog_file_channel(FAR const char *devpath);
 #endif

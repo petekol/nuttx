@@ -67,8 +67,8 @@
 #include "up_arch.h"
 #include "kinetis.h"
 #include "kinetis_usbotg.h"
-#include "kinetis_sim.h"
-#include "kinetis_fmc.h"
+#include "chip/kinetis_sim.h"
+#include "chip/kinetis_fmc.h"
 
 #if defined(CONFIG_USBDEV) && defined(CONFIG_KINETIS_USBOTG)
 
@@ -2738,7 +2738,7 @@ static int khci_interrupt(int irq, void *context)
 #ifdef CONFIG_USBOTG
   /* Session Request Protocol (SRP) Time Out Check */
 
-  /* if USB OTG SRP is ready */
+  /* Check if USB OTG SRP is ready */
 #  warning "Missing logic"
     {
       /* Check if the 1 millisecond timer has expired */
@@ -2959,6 +2959,8 @@ x
             }
         }
     }
+
+  UNUSED(otgir); /* May not be used, depending on above conditional logic */
 
   /* Clear the pending USB interrupt.  Goto is used in the above to assure
    * that all interrupt exists pass through this logic.
